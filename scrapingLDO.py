@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 import asyncio
 from playwright.async_api import async_playwright
 import json, csv
@@ -426,6 +427,8 @@ if __name__ == "__main__":
     # Uncomment the next line to run enrichment as a standalone script
     # enrich_jobs_with_skills_and_roles()
 =======
+=======
+>>>>>>> ab93d0a (first stable version)
 import asyncio
 from playwright.async_api import async_playwright
 import json, csv
@@ -685,7 +688,11 @@ async def scrape_linkedin_and_enrich(keyword: str = "data analyst"):
             await page.wait_for_selector("div.artdeco-entity-lockup__title", timeout=30000)
             all_job_data = []
             current_page = 1
+<<<<<<< HEAD
             max_pages = 1
+=======
+            max_pages = 1y
+>>>>>>> ab93d0a (first stable version)
             while current_page <= max_pages:
                 logger.info(f"Scraping page {current_page}...")
                 # Scroll to load more jobs
@@ -791,6 +798,7 @@ async def run_scraper(keyword: str = Query("data analyst")):
         print(traceback.format_exc())
         return JSONResponse(content={"status": "error", "message": str(e)}, status_code=500)
 
+<<<<<<< HEAD
 def enrich_jobs_with_skills_and_roles():
     supabase = init_supabase()
     jobs = supabase.table('scraping job').select("*").execute().data
@@ -856,4 +864,8 @@ if __name__ == "__main__":
     # Uncomment the next line to run enrichment as a standalone script
     # enrich_jobs_with_skills_and_roles()
 >>>>>>> 8b1ea48 (first stable version)
+=======
+# Only run this if being served directly (not when imported)
+if __name__ == "__main__":
+>>>>>>> ab93d0a (first stable version)
     uvicorn.run("scrapingLDO:app", host="0.0.0.0", port=8000) 
