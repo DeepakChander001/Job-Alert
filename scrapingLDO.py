@@ -18,8 +18,6 @@ load_dotenv()
 # Load credentials
 linkedin_email = os.getenv('LINKEDIN_EMAIL')
 linkedin_password = os.getenv('LINKEDIN_PASSWORD')
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=OPENAI_API_KEY)
 
 # Configure logging
 logging.basicConfig(
