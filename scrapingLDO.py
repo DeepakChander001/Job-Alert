@@ -10,7 +10,6 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, Query
 from fastapi.responses import JSONResponse
 import uvicorn
-from openai import OpenAI
 
 # Load environment variables
 load_dotenv()
