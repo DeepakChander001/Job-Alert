@@ -1,6 +1,14 @@
+<<<<<<< HEAD
 fastapi
 uvicorn
 playwright
 supabase
 python-dotenv
+=======
+fastapi
+uvicorn
+playwright
+supabase
+python-dotenv
+>>>>>>> 2f4e6f1 (Initial commit)
 openai 
