@@ -791,7 +791,69 @@ async def run_scraper(keyword: str = Query("data analyst")):
         print(traceback.format_exc())
         return JSONResponse(content={"status": "error", "message": str(e)}, status_code=500)
 
+def enrich_jobs_with_skills_and_roles():
+    supabase = init_supabase()
+    jobs = supabase.table('scraping job').select("*").execute().data
+    logger.info(f"Fetched {len(jobs)} jobs from scraping job table.")
+
+    clean_jobs = []
+    for idx, job in enumerate(jobs, 1):
+        desc = job.get("Job_Description", "")
+        if not desc or desc.startswith("❌"):
+            logger.warning(f"Skipping job {idx} due to missing/invalid description.")
+            continue
+        # Use the async OpenAI call as in the rest of the script
+        prompt = (
+            f"Given the following job description, extract:\n"
+            f"1. The required skills (as a comma-separated list)\n"
+            f"2. The main roles and responsibilities (as a short paragraph)\n\n"
+            f"Job Description:\n{desc}\n\n"
+            f"Return your answer in this JSON format:\n"
+            f'{{"skills_requirement": "...", "roles_and_responsibility": "..."}}'
+        )
+        try:
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.2
+            )
+            json_str = response.choices[0].message.content
+            data = json.loads(json_str)
+            skills = data.get("skills_requirement", "")
+            roles = data.get("roles_and_responsibility", "")
+        except Exception as e:
+            logger.error(f"OpenAI API error: {e}")
+            skills, roles = "", ""
+        logger.info(f"Processed job {idx}: Skills: {skills[:40]}... Roles: {roles[:40]}...")
+        clean_job = {
+            "Job_Title": job.get("Job_Title", ""),
+            "Company_Name": job.get("Company_Name", ""),
+            "Location": job.get("Location", ""),
+            "Job_URL": job.get("Job_URL", ""),
+            "Job_Description": desc,
+            "Company_Logo": job.get("Company_Logo", ""),
+            "Company_URL": job.get("Company_URL", ""),
+            "Skills_Requirement": skills,
+            "Roles_and_Responsibility": roles
+        }
+        clean_jobs.append(clean_job)
+        time.sleep(1.5)  # To avoid hitting OpenAI rate limits
+
+    # Insert into Clean Job data table in batches
+    batch_size = 50
+    for i in range(0, len(clean_jobs), batch_size):
+        batch = clean_jobs[i:i+batch_size]
+        supabase.table('Clean Job data').insert(batch).execute()
+        logger.info(f"Inserted batch {i//batch_size + 1} of {len(clean_jobs)//batch_size + 1}")
+
+    logger.info("All clean jobs inserted into Clean Job data table.")
+
 # Only run this if being served directly (not when imported)
 if __name__ == "__main__":
+<<<<<<< HEAD
 >>>>>>> 2f4e6f1 (Initial commit)
+=======
+    # Uncomment the next line to run enrichment as a standalone script
+    # enrich_jobs_with_skills_and_roles()
+>>>>>>> 8b1ea48 (first stable version)
     uvicorn.run("scrapingLDO:app", host="0.0.0.0", port=8000) 
